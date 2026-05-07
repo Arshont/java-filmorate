@@ -33,7 +33,7 @@ public class FilmService {
             throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
         films.put(film.getId(), film);
-        log.info("Фильм {} обновлеён. Новое значение: {}", oldFilm, film);
+        log.info("Фильм {} обновлён. Новое значение: {}", oldFilm, film);
         return film;
     }
 
