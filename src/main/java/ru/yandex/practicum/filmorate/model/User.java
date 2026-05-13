@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -19,7 +16,11 @@ public class User {
     @Email(message = "Email некорректен")
     private String email;
 
-    @NotBlank(message = "Логин не может быть пуст")
+
+    // Мб, немного корявая валидации в плане конфликта сообщений: одно и то же сообщение на пустой логин и логин с пробелами.
+    // Так сделано (@NotBlank -> @NotNull), чтобы избежать конфликта в тесте с тем, что порядок обработки правил валидации не фиксирован
+    // Буду рад совету, как сделать лучше
+    @NotNull(message = "Логин не может быть пустым")
     @Pattern(regexp = "\\S+", message = "Пробелы и другие пробельные символы в логине не допускаются")
     private String login;
 

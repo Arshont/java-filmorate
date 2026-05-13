@@ -66,7 +66,7 @@ class UserValidationTest {
         User user = createValidUser();
         user.setLogin(null);
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFieldError(violations, USER_LOGIN_PROPERTY, "Логин не может быть пуст");
+        assertFieldError(violations, USER_LOGIN_PROPERTY, "Логин не может быть пустым");
     }
 
     @Test
@@ -74,7 +74,7 @@ class UserValidationTest {
         User user = createValidUser();
         user.setLogin("");
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFieldError(violations, USER_LOGIN_PROPERTY, "Логин не может быть пуст");
+        assertFieldError(violations, USER_LOGIN_PROPERTY, "Пробелы и другие пробельные символы в логине не допускаются");
     }
 
     @Test
