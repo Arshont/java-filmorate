@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -17,17 +18,27 @@ public class UserService {
     private final Map<Long, User> users = new HashMap<>();
 
     public Collection<User> getAll() {
-        return users.values().stream().toList();
+        // А стоит ли логировать содержимое коллекции? Или фиксировать чисто факт вызова?
+        // С одной стороны, стоит иметь возможность в логах отследить состояние коллекции
+        // С другой, при большом размере коллекции логи сильно могут раздуться
+        // Что приоритетнее/правильнее в контексте текущей ситуации?
+        List<User> userList = users.values().stream().toList();
+        log.info("Запрошен список всех пользователей. Список: {}", userList);
+        return userList;
     }
 
     public User create(User user) {
         user.setId(getUniqueId());
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
+        setUserDefaultName(user);
         users.put(user.getId(), user);
         log.info("Создан пользователь: {}", user);
         return user;
+    }
+
+    private void setUserDefaultName(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 
     public User update(User user) {
