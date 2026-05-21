@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -11,12 +12,11 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmServiceTest {
-
     private FilmService filmService;
 
     @BeforeEach
     void setUp() {
-        filmService = new FilmService();
+        filmService = new FilmService(new InMemoryFilmStorage());
     }
 
     private Film createValidFilm() {

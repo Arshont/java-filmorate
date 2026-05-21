@@ -3,49 +3,38 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-    private final Map<Long, Film> films = new HashMap<>();
+    private final FilmStorage filmStorage;
+
+    /* Вопрос 1:
+    Насколько корректна ситуация, когда контроллер ходит напрямую в Storage?
+    Исходя из текста задания, в сервисе должен быть реализован только функционал друзей и лайков,
+    но доступ из контроллера в storage напрямую - это нечто вроде доступа сквозь один слой, не взаимодействую с ним.
+    Как мне кажется, ситуация, когда контроллер общается только с сервисом, как и storage взаимодействует только с сервисом, сильно более предпочтительна
+    Прав ли я?
+     */
 
     public Collection<Film> getAll() {
-        List<Film> filmList = films.values().stream().toList();
-        log.info("Запрошен список всех фильмов. Получено элементов: {}", filmList.size());
-        return filmList;
+        return filmStorage.getAll();
+    }
+
+    public Film getById(Long id) {
+        return filmStorage.getById(id);
     }
 
     public Film create(Film film) {
-        film.setId(getUniqueId());
-        films.put(film.getId(), film);
-        log.info("Создан фильм: {}", film);
-        return film;
+        return filmStorage.create(film);
     }
 
     public Film update(Film film) {
-        Film oldFilm = films.get(film.getId());
-        if (oldFilm == null) {
-            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
-        }
-        films.put(film.getId(), film);
-        log.info("Фильм {} обновлён. Новое значение: {}", oldFilm, film);
-        return film;
-    }
-
-    private Long getUniqueId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+        return filmStorage.update(film);
     }
 }
