@@ -58,7 +58,7 @@ class UserServiceTest {
         updateUser.setId(createdUser.getId());
         updateUser.setEmail("new@example.com");
         updateUser.setLogin("newlogin");
-        updateUser.setName(null); // name is null
+        updateUser.setName(null);
         updateUser.setBirthday(LocalDate.of(1995, 5, 5));
 
         User updatedUser = userService.update(updateUser);
