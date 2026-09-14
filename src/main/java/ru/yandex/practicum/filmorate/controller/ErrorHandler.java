@@ -25,8 +25,6 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    // Вопрос 1:
-    // Мб, лучше было бы Http.UNPROCESSABLE_ENTITY (422)? Но в тестах Postman 400
     public ErrorResponse handleValidationErrors(final MethodArgumentNotValidException e) {
 
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();

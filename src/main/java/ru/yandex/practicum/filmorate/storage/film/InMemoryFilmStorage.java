@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +16,8 @@ import java.util.Map;
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
+    private static final Comparator<Film> BY_LIKES_DESC =
+            Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed();
     /* Вопрос 1:
      * Где логировать CRUD операции? В сервисе или в Storage?
      * Или и там, и там, просто с разным контекстом (Если так, то какую дополнительную информацию нужно фиксировать)?
@@ -61,6 +65,31 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
+    public Collection<Film> getMostPopular(int count) {
+        Collection<Film> mostPopularFilms = films.values().stream()
+                .sorted(BY_LIKES_DESC)
+                .limit(count)
+                .toList();
+        log.info("Запрошено {} самых популярных фильмов. Получено элементов {}", count, mostPopularFilms.size());
+        return mostPopularFilms;
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        Film film = films.get(filmId);
+        if (film == null) throw new NotFoundException("Фильм с id " + filmId + " не найден");
+        film.getLikes().add(userId);
+        log.info("Пользователь с Id {} поставил лайк фильму с Id {}", userId, filmId);
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+        Film film = films.get(filmId);
+        if (film == null) throw new NotFoundException("Фильм с id " + filmId + " не найден");
+        film.getLikes().remove(userId);
+        log.info("Пользователь с Id {} удалил лайк фильму с Id {}", userId, filmId);
+    }
 
     private Long getUniqueId() {
         long currentMaxId = films.keySet()

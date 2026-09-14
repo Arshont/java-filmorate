@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -16,7 +17,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService();
+        userService = new UserService(new InMemoryUserStorage());
     }
 
     private User createValidUser() {
@@ -26,6 +27,14 @@ class UserServiceTest {
         user.setName("User Name");
         user.setBirthday(LocalDate.of(1990, 1, 1));
         return user;
+    }
+
+    private User createAndSaveUser(String login) {
+        User user = createValidUser();
+        user.setEmail(login + "@example.com");
+        user.setLogin(login);
+        user.setName(login);
+        return userService.create(user);
     }
 
     @Test
@@ -159,5 +168,154 @@ class UserServiceTest {
         Collection<User> users = userService.getAll();
 
         assertTrue(users.isEmpty());
+    }
+
+    @Test
+    void addFriend_shouldAddFriendToBothUsers() {
+        User user = createAndSaveUser("user1");
+        User friend = createAndSaveUser("user2");
+
+        userService.addFriend(user.getId(), friend.getId());
+
+        assertTrue(userService.getById(user.getId()).getFriends().contains(friend.getId()));
+        assertTrue(userService.getById(friend.getId()).getFriends().contains(user.getId()));
+    }
+
+    @Test
+    void addFriend_shouldNotDuplicateFriend() {
+        User user = createAndSaveUser("user1");
+        User friend = createAndSaveUser("user2");
+
+        userService.addFriend(user.getId(), friend.getId());
+        userService.addFriend(user.getId(), friend.getId());
+
+        assertEquals(1, userService.getById(user.getId()).getFriends().size());
+        assertEquals(1, userService.getById(friend.getId()).getFriends().size());
+    }
+
+    @Test
+    void addFriend_shouldThrowNotFoundIfUserNotExists() {
+        User friend = createAndSaveUser("user2");
+
+        assertThrows(NotFoundException.class, () -> userService.addFriend(999L, friend.getId()));
+    }
+
+    @Test
+    void addFriend_shouldThrowNotFoundIfFriendNotExists() {
+        User user = createAndSaveUser("user1");
+
+        assertThrows(NotFoundException.class, () -> userService.addFriend(user.getId(), 999L));
+    }
+
+    @Test
+    void deleteFriend_shouldRemoveFriendFromBothUsers() {
+        User user = createAndSaveUser("user1");
+        User friend = createAndSaveUser("user2");
+        userService.addFriend(user.getId(), friend.getId());
+
+        userService.deleteFriend(user.getId(), friend.getId());
+
+        assertTrue(userService.getById(user.getId()).getFriends().isEmpty());
+        assertTrue(userService.getById(friend.getId()).getFriends().isEmpty());
+    }
+
+    @Test
+    void deleteFriend_shouldDoNothingIfUsersAreNotFriends() {
+        User user = createAndSaveUser("user1");
+        User friend = createAndSaveUser("user2");
+
+        assertDoesNotThrow(() -> userService.deleteFriend(user.getId(), friend.getId()));
+        assertTrue(userService.getById(user.getId()).getFriends().isEmpty());
+        assertTrue(userService.getById(friend.getId()).getFriends().isEmpty());
+    }
+
+    @Test
+    void deleteFriend_shouldThrowNotFoundIfUserNotExists() {
+        User friend = createAndSaveUser("user2");
+
+        assertThrows(NotFoundException.class, () -> userService.deleteFriend(999L, friend.getId()));
+    }
+
+    @Test
+    void deleteFriend_shouldThrowNotFoundIfFriendNotExists() {
+        User user = createAndSaveUser("user1");
+
+        assertThrows(NotFoundException.class, () -> userService.deleteFriend(user.getId(), 999L));
+    }
+
+    @Test
+    void getFriends_shouldReturnAllFriends() {
+        User user = createAndSaveUser("user1");
+        User friend1 = createAndSaveUser("user2");
+        User friend2 = createAndSaveUser("user3");
+
+        userService.addFriend(user.getId(), friend1.getId());
+        userService.addFriend(user.getId(), friend2.getId());
+
+        Collection<User> friends = userService.getFriends(user.getId());
+
+        assertEquals(2, friends.size());
+        assertTrue(friends.contains(friend1));
+        assertTrue(friends.contains(friend2));
+    }
+
+    @Test
+    void getFriends_shouldReturnEmptyCollectionIfUserHasNoFriends() {
+        User user = createAndSaveUser("user1");
+
+        Collection<User> friends = userService.getFriends(user.getId());
+
+        assertTrue(friends.isEmpty());
+    }
+
+    @Test
+    void getFriends_shouldThrowNotFoundIfUserNotExists() {
+        assertThrows(NotFoundException.class, () -> userService.getFriends(999L));
+    }
+
+    @Test
+    void getCommonFriends_shouldReturnCommonFriends() {
+        User user1 = createAndSaveUser("user1");
+        User user2 = createAndSaveUser("user2");
+        User commonFriend = createAndSaveUser("common");
+        User ownFriend = createAndSaveUser("own");
+
+        userService.addFriend(user1.getId(), commonFriend.getId());
+        userService.addFriend(user2.getId(), commonFriend.getId());
+        userService.addFriend(user1.getId(), ownFriend.getId());
+
+        Collection<User> commonFriends = userService.getCommonFriends(user1.getId(), user2.getId());
+
+        assertEquals(1, commonFriends.size());
+        assertTrue(commonFriends.contains(commonFriend));
+    }
+
+    @Test
+    void getCommonFriends_shouldReturnEmptyCollectionIfNoCommonFriends() {
+        User user1 = createAndSaveUser("user1");
+        User user2 = createAndSaveUser("user2");
+        User friendOfUser1 = createAndSaveUser("user3");
+        User friendOfUser2 = createAndSaveUser("user4");
+
+        userService.addFriend(user1.getId(), friendOfUser1.getId());
+        userService.addFriend(user2.getId(), friendOfUser2.getId());
+
+        Collection<User> commonFriends = userService.getCommonFriends(user1.getId(), user2.getId());
+
+        assertTrue(commonFriends.isEmpty());
+    }
+
+    @Test
+    void getCommonFriends_shouldThrowNotFoundIfUserNotExists() {
+        User user = createAndSaveUser("user1");
+
+        assertThrows(NotFoundException.class, () -> userService.getCommonFriends(999L, user.getId()));
+    }
+
+    @Test
+    void getCommonFriends_shouldThrowNotFoundIfOtherUserNotExists() {
+        User user = createAndSaveUser("user1");
+
+        assertThrows(NotFoundException.class, () -> userService.getCommonFriends(user.getId(), 999L));
     }
 }

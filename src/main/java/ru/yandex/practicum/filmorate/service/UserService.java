@@ -29,4 +29,20 @@ public class UserService {
     public User update(User user) {
         return userStorage.update(user);
     }
+
+    public void addFriend(Long userId, Long friendId){
+        userStorage.addFriend(userId, friendId);
+    }
+
+    public void deleteFriend(Long userId, Long friendId){
+        userStorage.deleteFriend(userId, friendId);
+    }
+
+    public Collection<User> getFriends(Long userId) {
+        return userStorage.getFriends(userId);
+    }
+
+    public Collection<User> getCommonFriends(Long userId, Long friendId) {
+        return userStorage.getCommonFriends(userId, friendId);
+    }
 }
