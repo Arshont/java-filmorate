@@ -30,11 +30,11 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public void addFriend(Long userId, Long friendId){
+    public void addFriend(Long userId, Long friendId) {
         userStorage.addFriend(userId, friendId);
     }
 
-    public void deleteFriend(Long userId, Long friendId){
+    public void deleteFriend(Long userId, Long friendId) {
         userStorage.deleteFriend(userId, friendId);
     }
 
