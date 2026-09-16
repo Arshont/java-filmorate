@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -30,4 +33,7 @@ public class Film {
     private boolean isReleaseDateValid() {
         return releaseDate == null || !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
     }
+
+    @JsonIgnore
+    private Set<Long> likes = new HashSet<>();
 }

@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = {"id"}) // Как будто бы стоит учитывать и email,
@@ -25,5 +28,8 @@ public class User {
     @NotNull(message = "Дата рождения не может быть пуста")
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
+
+    @JsonIgnore
+    private Set<Long> friends = new HashSet<>();
 }
 
