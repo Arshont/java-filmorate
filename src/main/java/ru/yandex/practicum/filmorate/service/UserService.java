@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -52,7 +53,7 @@ public class UserService {
         Optional<User> optionalFriend = userStorage.getById(friendId);
         if (optionalFriend.isEmpty()) throw new NotFoundException("Пользователь с id " + friendId + " не найден");
 
-        if (optionalUser.get() == optionalFriend.get())
+        if (Objects.equals(userId, friendId))
             throw new ConflictException("Пользователь и его друг имеют одинаковый Id: " + userId);
 
         userStorage.addFriend(userId, friendId);
@@ -65,7 +66,7 @@ public class UserService {
         Optional<User> optionalFriend = userStorage.getById(friendId);
         if (optionalFriend.isEmpty()) throw new NotFoundException("Пользователь с id " + friendId + " не найден");
 
-        if (optionalUser.get() == optionalFriend.get())
+        if (Objects.equals(userId, friendId))
             throw new ConflictException("Пользователь и его друг имеют одинаковый Id: " + userId);
 
         userStorage.deleteFriend(userId, friendId);
@@ -86,7 +87,7 @@ public class UserService {
         Optional<User> optionalFriend = userStorage.getById(friendId);
         if (optionalFriend.isEmpty()) throw new NotFoundException("Пользователь с id " + friendId + " не найден");
 
-        if (optionalUser.get() == optionalFriend.get())
+        if (Objects.equals(userId, friendId))
             throw new ConflictException("Пользователь и его друг имеют одинаковый Id: " + userId);
 
         Collection<User> commonFriends = userStorage.getCommonFriends(userId, friendId);

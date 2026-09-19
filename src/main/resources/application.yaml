@@ -1,2 +1,16 @@
-logging.level:
-  root: TRACE
+logging:
+  level:
+    root: INFO
+    ru.yandex.practicum.filmorate: DEBUG
+    org.zalando.logbook: TRACE
+
+spring:
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+  datasource:
+    url: jdbc:h2:file:./db/filmorate
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
